@@ -1,0 +1,32 @@
+{
+  "name": "reactify",
+  "version": "4.0.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.1.4",
+    "@emotion/styled": "^11.0.0",
+    "@material-ui/core": "^5.0.0-alpha.24",
+    "@material-ui/icons": "^4.11.2",
+    "@vercel/node": "^1.9.0",
+    "clsx": "latest",
+    "dotenv": "^8.2.0",
+    "face-api.js": "^0.22.2",
+    "fs-extra": "^9.1.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
+    "postbuild": "node scripts/sitemap.js"
+  },
+  "devDependencies": {
+    "@types/next": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "typescript": "latest"
+  }
+}
