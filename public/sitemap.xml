@@ -4,7 +4,10 @@
     <loc>http://localhost:3000/api/helloworld</loc>
     <lastmod>2021-01-29</lastmod>
   </url>,<url>
+    <loc>http://localhost:3000/api/spotify</loc>
+    <lastmod>2021-01-31</lastmod>
+  </url>,<url>
     <loc>http://localhost:3000</loc>
-    <lastmod>2021-01-29</lastmod>
+    <lastmod>2021-01-31</lastmod>
   </url>
 </urlset>

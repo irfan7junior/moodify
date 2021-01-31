@@ -3,6 +3,7 @@ import Head from 'next/head'
 import { AppProps } from 'next/app'
 import { ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
+
 import { mainTheme as theme } from 'src/styles/material-ui'
 import Header from 'src/components/Header'
 import Footer from 'src/components/Footer'
@@ -19,7 +20,7 @@ export default function MyApp(props: AppProps) {
   }, [])
 
   return (
-    <React.Fragment>
+    <>
       <Head>
         <title>Moodify</title>
         <meta
@@ -34,6 +35,6 @@ export default function MyApp(props: AppProps) {
         <Component {...pageProps} />
         <Footer />
       </ThemeProvider>
-    </React.Fragment>
+    </>
   )
 }

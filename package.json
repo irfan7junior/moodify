@@ -7,14 +7,20 @@
     "@emotion/styled": "^11.0.0",
     "@material-ui/core": "^5.0.0-alpha.24",
     "@material-ui/icons": "^4.11.2",
+    "@types/next-auth": "^3.1.23",
+    "@types/qs": "^6.9.5",
     "@vercel/node": "^1.9.0",
+    "axios": "^0.21.1",
     "clsx": "latest",
     "dotenv": "^8.2.0",
     "face-api.js": "^0.22.2",
     "fs-extra": "^9.1.0",
     "next": "latest",
+    "qs": "^6.9.6",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "spotify-web-api-node": "^5.0.2",
+    "xhr2": "^0.2.0"
   },
   "scripts": {
     "dev": "next",
@@ -27,6 +33,7 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/spotify-web-api-node": "^5.0.0",
     "typescript": "latest"
   }
 }
