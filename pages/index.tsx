@@ -12,6 +12,12 @@ import {
   SnackbarContent,
   Chip,
   Avatar,
+  Card,
+  CardContent,
+  Typography,
+  IconButton,
+  CardMedia,
+  useTheme,
 } from '@material-ui/core'
 import clsx from 'clsx'
 import * as faceapi from 'face-api.js'
@@ -21,6 +27,11 @@ import Link from 'src/Link'
 import { styles } from 'src/styles/global'
 import { CLIENT_WEBSITE as WEBSITE } from 'src/defaults'
 import { FaceExpressions } from 'face-api.js'
+import axios from 'axios'
+import { Track } from 'src/@types/common'
+import { PlayArrow, SkipNext, SkipPrevious } from '@material-ui/icons'
+
+import { MyTheme } from 'src/styles/material-ui'
 
 interface valueType {
   value: number
@@ -34,7 +45,7 @@ interface moodType {
 
 type keyType = Extract<keyof Omit<FaceExpressions, 'asSortedArray'>, string>
 
-type ArrayResultReturnType = Partial<
+export type ArrayResultReturnType = Partial<
   Record<keyType, Omit<FaceExpressions, 'asSortedArray'>>
 > &
   valueType &
@@ -48,12 +59,12 @@ const convertObjectToArrayObjects = (
 
   const mapMoodToColor: Record<keyType, string> = {
     angry: colors.red[500],
-    disgusted: '#fff',
+    disgusted: '#000',
     fearful: colors.purple[500],
     happy: colors.green[500],
     neutral: 'teal',
     sad: 'grey',
-    surprised: colors.yellow[500],
+    surprised: '#d1c23e',
   }
   for (const item in faceExpressions) {
     result.push({
@@ -121,6 +132,8 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
       }
     })
   )
+  const [spotifyTracks, setSpotifyTracks] = useState<Track[]>([])
+  const theme = useTheme<MyTheme>()
 
   useEffect(() => {
     Promise.all([
@@ -168,10 +181,27 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
       })
       ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height)
       faceapi.draw.drawFaceLandmarks(canvasRef.current!, resizedDetections)
-      // faceapi.draw.drawDetections(canvasRef.current!, resizedDetections)
-      // faceapi.draw.drawFaceExpressions(canvasRef.current!, resizedDetections)
     }, 100)
   }
+
+  const fetchTracks = async (
+    sendData: Omit<FaceExpressions, 'asSortedArray'>
+  ) => {
+    const data = (
+      await axios.post<{ results: Track[] }>('/api/spotify', {
+        expressions: sendData,
+      })
+    ).data
+    console.log(data.results)
+    setSpotifyTracks(data.results)
+    return data.results
+  }
+
+  useEffect(() => {
+    if (finalExpressionReturn.some((expression) => expression.value !== 0)) {
+      fetchTracks(finalExpression)
+    }
+  }, [finalExpressionReturn, finalExpression])
 
   useEffect(() => {
     if (expressionCount > maxCount) {
@@ -179,13 +209,13 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
       setExpressionCount(0)
       setFinalExpression((prevState) => {
         const answers = {
-          angry: faceExpressions.angry * (100 / maxCount),
-          disgusted: faceExpressions.disgusted * (100 / maxCount),
-          fearful: faceExpressions.fearful * (100 / maxCount),
-          happy: faceExpressions.happy * (100 / maxCount),
-          neutral: faceExpressions.neutral * (100 / maxCount),
-          sad: faceExpressions.sad * (100 / maxCount),
-          surprised: faceExpressions.surprised * (100 / maxCount),
+          angry: Math.round(faceExpressions.angry * (100 / maxCount)),
+          disgusted: Math.round(faceExpressions.disgusted * (100 / maxCount)),
+          fearful: Math.round(faceExpressions.fearful * (100 / maxCount)),
+          happy: Math.round(faceExpressions.happy * (100 / maxCount)),
+          neutral: Math.round(faceExpressions.neutral * (100 / maxCount)),
+          sad: Math.round(faceExpressions.sad * (100 / maxCount)),
+          surprised: Math.round(faceExpressions.surprised * (100 / maxCount)),
         }
         setFinalExpressionReturn(convertObjectToArrayObjects(answers))
         return answers
@@ -221,6 +251,7 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
   }, [])
 
   const startVideo = () => {
+    setSpotifyTracks([])
     setSnackbarOptions({
       backgroundColor: colors.green[500],
       on: true,
@@ -285,7 +316,12 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
         >
           <Grid
             item
-            style={{ position: 'relative', height: '400px', width: '400px' }}
+            style={{
+              position: 'relative',
+              height: '400px',
+              width: '400px',
+              boxShadow: '0 0 5px black',
+            }}
           >
             <video
               ref={videoRef}
@@ -300,6 +336,71 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
               ref={canvasRef}
               style={{ position: 'absolute', left: 0, top: 0 }}
             />
+            {videoRef.current?.paused && (
+              <Grid
+                item
+                container
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  height: '100%',
+                  overflowY: 'auto',
+                }}
+                className={classes.scrollBar}
+              >
+                {spotifyTracks.map((track) => (
+                  <Card className={css.cardRoot} key={track.id}>
+                    <div className={css.details}>
+                      <CardContent className={css.content}>
+                        <Typography
+                          component="div"
+                          style={{
+                            fontFamily: 'Langar',
+                            color: 'teal',
+                            fontSize: '1rem',
+                          }}
+                          variant="h5"
+                        >
+                          {track.name}
+                        </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          color="textSecondary"
+                          component="div"
+                          style={{ color: 'orange', fontSize: '0.9rem' }}
+                        >
+                          {track.artists[0].name}
+                        </Typography>
+                      </CardContent>
+                      <div className={css.controls}>
+                        <IconButton
+                          style={{
+                            fontFamily: 'cursive',
+                            fontSize: 'small',
+                            backgroundColor: '#ede2e2',
+                            paddingRight: '5px',
+                            borderRadius: '25px',
+                          }}
+                          href={track.external_urls.spotify}
+                          size="small"
+                          aria-label="play/pause"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
+                          <PlayArrow className={css.playIcon} /> Spotify
+                        </IconButton>
+                      </div>
+                    </div>
+                    <CardMedia
+                      className={css.cover}
+                      image={track.album.images[0].url}
+                      title={track.name}
+                    />
+                  </Card>
+                ))}
+              </Grid>
+            )}
           </Grid>
           <Grid item>
             <Grid item container justifyContent="center">
@@ -335,7 +436,7 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
               justifyContent="center"
               className={css.moodChips}
             >
-              {finalExpressionReturn.slice(0, 3).map((expression) => (
+              {finalExpressionReturn.map((expression) => (
                 <Chip
                   size="medium"
                   label={expression.mood.toUpperCase()}
@@ -404,7 +505,6 @@ const useStyles = makeStyles((theme) => ({
     transform: 'rotateY(180deg)',
     '-webkit-transform': 'rotateY(180deg)',
     '-moz-transform': 'rotateY(180deg)',
-    boxShadow: '0 0 5px black',
   },
   moodChips: {
     '& > *': {
@@ -412,6 +512,40 @@ const useStyles = makeStyles((theme) => ({
     },
     marginTop: '2rem',
     boxShadow: '0 0 5px black',
+  },
+  cardRoot: {
+    display: 'flex',
+    width: '100%',
+    margin: '5px',
+    paddingBottom: '5px',
+  },
+  details: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  content: {
+    flex: '1 0 auto',
+    paddingBottom: '0',
+  },
+  cover: {
+    maxWidth: '120px',
+    minWidth: '120px',
+    maxHeight: '85px',
+    minHeight: '85px',
+    marginLeft: 'auto',
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    marginRight: '1rem',
+  },
+  controls: {
+    display: 'flex',
+    alignItems: 'center',
+    paddingLeft: theme.spacing(1),
+  },
+  playIcon: {
+    height: 25,
+    width: 25,
+    color: '#009472',
   },
 }))
 
