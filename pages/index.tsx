@@ -108,26 +108,12 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
   const [toggleStart, setToggleStart] = useState(true)
   const [faceExpressions, setFaceExpressions] = useState<
     Omit<FaceExpressions, 'asSortedArray'>
-  >({
-    angry: 0,
-    disgusted: 0,
-    fearful: 0,
-    happy: 0,
-    neutral: 100,
-    sad: 0,
-    surprised: 0,
-  })
+  >({ ...initialState })
   const [expressionCount, setExpressionCount] = useState<number>(0)
   const [finalExpression, setFinalExpression] = useState<
     Omit<FaceExpressions, 'asSortedArray'>
   >({
-    angry: 0,
-    disgusted: 0,
-    fearful: 0,
-    happy: 0,
-    neutral: 100,
-    sad: 0,
-    surprised: 0,
+    ...initialState,
   })
   const [snackbarOptions, setSnackbarOptions] = useState({
     message: '',
@@ -136,16 +122,18 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
   })
   const [finalExpressionReturn, setFinalExpressionReturn] = useState<
     ArrayResultReturnType[]
-  >([
-    { neutral: 100, value: 100, color: 'teal', mood: 'neutral' },
-    { angry: 0, value: 0, color: '#f44336', mood: 'angry' },
-    { disgusted: 0, value: 0, color: '#000', mood: 'disgusted' },
-    { fearful: 0, value: 0, color: '#9c27b0', mood: 'fearful' },
-    { happy: 0, value: 0, color: '#4caf50', mood: 'happy' },
-    { sad: 0, value: 0, color: 'grey', mood: 'sad' },
-    { surprised: 0, value: 0, color: '#d1c23e', mood: 'surprised' },
-  ])
+  >(
+    Object.keys({ ...initialState }).map((item) => {
+      return {
+        color: '',
+        value: 0,
+        [item]: 0,
+        mood: item,
+      }
+    })
+  )
   const [spotifyTracks, setSpotifyTracks] = useState<Track[]>([])
+  const typographyRef = useRef<HTMLSpanElement>(null)
   const theme = useTheme<MyTheme>()
 
   useEffect(() => {
@@ -200,24 +188,15 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
   const fetchTracks = async (
     sendData: Omit<FaceExpressions, 'asSortedArray'>
   ) => {
+    typographyRef.current!.textContent = 'Loading...'
     const data = (
       await axios.post<{ results: Track[] }>('/api/spotify', {
         expressions: sendData,
       })
     ).data
-    console.log(data.results)
-    setSpotifyTracks((prevState) => {
-      setFinalExpressionReturn(
-        Object.keys({ ...initialState }).map((item) => {
-          return {
-            color: '',
-            value: 0,
-            [item]: 0,
-            mood: item,
-          }
-        })
-      )
 
+    typographyRef.current!.textContent = ''
+    setSpotifyTracks((prevState) => {
       setFinalExpression({ ...initialState })
 
       return data.results
@@ -225,10 +204,16 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
   }
 
   useEffect(() => {
-    if (finalExpressionReturn.some((expression) => expression.value !== 0)) {
+    if (
+      finalExpressionReturn.some(
+        (expression) =>
+          expression.value !== 0 &&
+          Object.keys(finalExpression).some(
+            (key) => finalExpression[key as keyType] !== 0
+          )
+      )
+    ) {
       fetchTracks(finalExpression)
-      console.log(finalExpression)
-      console.log(finalExpressionReturn)
     }
   }, [finalExpressionReturn, finalExpression])
 
@@ -236,6 +221,7 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
     if (expressionCount > maxCount) {
       stopVideo()
       setExpressionCount(0)
+      console.log(faceExpressions)
       setFinalExpression((prevState) => {
         const answers = {
           angry: Math.round(faceExpressions.angry * (100 / maxCount)),
@@ -280,6 +266,7 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
   }, [])
 
   const startVideo = () => {
+    typographyRef.current!.textContent = ''
     setSpotifyTracks([])
     setSnackbarOptions({
       backgroundColor: colors.green[500],
@@ -347,8 +334,8 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
             item
             style={{
               position: 'relative',
-              height: '400px',
-              width: '400px',
+              height: '350px',
+              width: '350px',
               boxShadow: '0 0 5px black',
             }}
           >
@@ -356,8 +343,8 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
               ref={videoRef}
               muted
               autoPlay
-              height="400px"
-              width="400px"
+              height="350px"
+              width="350px"
               hidden={videoHidden}
               className={css.video}
             ></video>
@@ -365,6 +352,25 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
               ref={canvasRef}
               style={{ position: 'absolute', left: 0, top: 0 }}
             />
+            <Typography
+              variant="h2"
+              color="primary"
+              style={{
+                fontFamily: 'Langar,Roboto,Pacifico,sans-serif,cursive',
+                fontWeight: 300,
+                textAlign: 'center',
+                fontSize: '3.75rem',
+                lineHeight: 1.2,
+                color: '#1F434B',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                margin: '0 auto',
+              }}
+              ref={typographyRef}
+            >
+              Press Start to Try!
+            </Typography>
             {videoRef.current?.paused && (
               <Grid
                 item

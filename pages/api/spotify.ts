@@ -7,9 +7,7 @@ import spotifyWebApi from 'spotify-web-api-node'
 const seed_artists = [
   '5GnnSrwNCGyfAU4zuIytiS',
   '06HL4z0CvFAxyc27GXpf02',
-  '5GnnSrwNCGyfAU4zuIytiS',
   '4fEkbug6kZzzJ8eYX6Kbbp',
-  '0C8ZW7ezQVs4URX5aX7Kqx',
 ]
 const seed_genres = ['modern bollywood', 'hip hop', 'sufi', 'dance pop'].join(
   ', '
@@ -31,8 +29,6 @@ export default async (req: NowRequest, res: NowResponse) => {
     },
     data,
   })
-
-  console.log(req.body)
 
   const { angry, disgusted, fearful, happy, neutral, sad, surprised } = req.body
     .expressions as Omit<FaceExpressions, 'asSortedArray'>
@@ -59,6 +55,8 @@ export default async (req: NowRequest, res: NowResponse) => {
 
   const spotifyApi = new spotifyWebApi({})
   spotifyApi.setAccessToken(response.data.access_token)
+
+  // console.log(spotifyApi.getAccessToken())
 
   const results = await spotifyApi.getRecommendations({
     market,
