@@ -5,9 +5,26 @@ import qs from 'qs'
 import spotifyWebApi from 'spotify-web-api-node'
 
 const seed_artists = [
-  '5GnnSrwNCGyfAU4zuIytiS',
-  '06HL4z0CvFAxyc27GXpf02',
+  '0E02VcvA5p1ndkLdqWD5JB',
   '4fEkbug6kZzzJ8eYX6Kbbp',
+  '7HCqGPJcQTyGJ2yqntbuyr',
+  '3eDT9fwXKuHWFvgZaaYC5v',
+  '5GnnSrwNCGyfAU4zuIytiS',
+  '5T2I75UlGBcWd5nVyfmL13',
+  '3OLGltG8UPIea8sA4w0yg0',
+  '2oSONSC9zQ4UonDKnLqksx',
+  '6CXEwIaXYfVJ84biCxqc9k',
+  '7uIbLdzzSEqnX0Pkrb56cR',
+  '1wRPtKGflJrBx9BmLsSwlU',
+  '0oOet2f43PA68X5RxKobEy',
+  '61if35zz1W11GejEkxTLEQ',
+  '4oVMLzAqW6qhRpZWt8fNw4',
+  '09UmIX92EUH9hAK4bxvHx6',
+  '2L16nDKTxhFGaDriR2AHTB',
+  '71oGOxg5ez52Hh1Ye41A98',
+  '7HHLBC9hUb55SDUcBlM8FQ',
+  '0sSxphmGskGCKlwB9xa6WU',
+  '0L5GV6LN8SWWUWIdBbTLTZ',
 ]
 const seed_genres = ['modern bollywood', 'hip hop', 'sufi', 'dance pop'].join(
   ', '
@@ -56,19 +73,27 @@ export default async (req: NowRequest, res: NowResponse) => {
   const spotifyApi = new spotifyWebApi({})
   spotifyApi.setAccessToken(response.data.access_token)
 
-  console.log(spotifyApi.getAccessToken())
+  // console.log(spotifyApi.getAccessToken())
 
-  const results = await spotifyApi.getRecommendations({
-    market,
-    seed_artists: seed_artists[Math.floor(Math.random() * seed_artists.length)],
-    seed_genres,
-    limit: 10,
-    target_danceability,
-    target_energy,
-    target_loudness,
-  })
+  let count = 0
+  let results: any = { body: { tracks: [] } }
+  while (true && count < 100) {
+    results = await spotifyApi.getRecommendations({
+      market,
+      seed_artists:
+        seed_artists[Math.floor(Math.random() * seed_artists.length)],
+      seed_genres,
+      limit: 10,
+      target_danceability,
+      target_energy,
+      target_loudness,
+    })
+    count++
+    if (results.body.tracks.length > 0) break
+  }
 
-  res.status(200).json({
-    results: results.body.tracks,
-  })
+  if (results)
+    res.status(200).json({
+      results: results.body.tracks,
+    })
 }
