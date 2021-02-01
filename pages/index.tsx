@@ -29,7 +29,7 @@ import { CLIENT_WEBSITE as WEBSITE } from 'src/defaults'
 import { FaceExpressions } from 'face-api.js'
 import axios from 'axios'
 import { Track } from 'src/@types/common'
-import { PlayArrow, SkipNext, SkipPrevious } from '@material-ui/icons'
+import { PlayArrow } from '@material-ui/icons'
 
 import { MyTheme } from 'src/styles/material-ui'
 
@@ -45,9 +45,7 @@ interface moodType {
 
 type keyType = Extract<keyof Omit<FaceExpressions, 'asSortedArray'>, string>
 
-export type ArrayResultReturnType = Partial<
-  Record<keyType, Omit<FaceExpressions, 'asSortedArray'>>
-> &
+export type ArrayResultReturnType = Partial<Record<keyType, number>> &
   valueType &
   colorType &
   moodType
@@ -110,11 +108,27 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
   const [toggleStart, setToggleStart] = useState(true)
   const [faceExpressions, setFaceExpressions] = useState<
     Omit<FaceExpressions, 'asSortedArray'>
-  >(initialState)
+  >({
+    angry: 0,
+    disgusted: 0,
+    fearful: 0,
+    happy: 0,
+    neutral: 100,
+    sad: 0,
+    surprised: 0,
+  })
   const [expressionCount, setExpressionCount] = useState<number>(0)
   const [finalExpression, setFinalExpression] = useState<
     Omit<FaceExpressions, 'asSortedArray'>
-  >(initialState)
+  >({
+    angry: 0,
+    disgusted: 0,
+    fearful: 0,
+    happy: 0,
+    neutral: 100,
+    sad: 0,
+    surprised: 0,
+  })
   const [snackbarOptions, setSnackbarOptions] = useState({
     message: '',
     backgroundColor: '',
@@ -122,16 +136,15 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
   })
   const [finalExpressionReturn, setFinalExpressionReturn] = useState<
     ArrayResultReturnType[]
-  >(
-    Object.keys({ ...initialState }).map((item) => {
-      return {
-        color: '',
-        value: 0,
-        [item]: 0,
-        mood: item,
-      }
-    })
-  )
+  >([
+    { neutral: 100, value: 100, color: 'teal', mood: 'neutral' },
+    { angry: 0, value: 0, color: '#f44336', mood: 'angry' },
+    { disgusted: 0, value: 0, color: '#000', mood: 'disgusted' },
+    { fearful: 0, value: 0, color: '#9c27b0', mood: 'fearful' },
+    { happy: 0, value: 0, color: '#4caf50', mood: 'happy' },
+    { sad: 0, value: 0, color: 'grey', mood: 'sad' },
+    { surprised: 0, value: 0, color: '#d1c23e', mood: 'surprised' },
+  ])
   const [spotifyTracks, setSpotifyTracks] = useState<Track[]>([])
   const theme = useTheme<MyTheme>()
 
@@ -193,13 +206,29 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
       })
     ).data
     console.log(data.results)
-    setSpotifyTracks(data.results)
-    return data.results
+    setSpotifyTracks((prevState) => {
+      setFinalExpressionReturn(
+        Object.keys({ ...initialState }).map((item) => {
+          return {
+            color: '',
+            value: 0,
+            [item]: 0,
+            mood: item,
+          }
+        })
+      )
+
+      setFinalExpression({ ...initialState })
+
+      return data.results
+    })
   }
 
   useEffect(() => {
     if (finalExpressionReturn.some((expression) => expression.value !== 0)) {
       fetchTracks(finalExpression)
+      console.log(finalExpression)
+      console.log(finalExpressionReturn)
     }
   }, [finalExpressionReturn, finalExpression])
 

@@ -28,11 +28,11 @@ export default async (req: NowRequest, res: NowResponse) => {
     url: 'https://accounts.spotify.com/api/token',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      Cookie:
-        '__Host-device_id=AQDUgM1GLRm3A1DK23itzgiTP2qM5MNdBCXHPGdusVG8kQ6CcifHjT3rCxZxgFhdlpUnPRaAEbfZuJ1iILwhV8uWRoRrCSJkzLg',
     },
     data,
   })
+
+  console.log(req.body)
 
   const { angry, disgusted, fearful, happy, neutral, sad, surprised } = req.body
     .expressions as Omit<FaceExpressions, 'asSortedArray'>
