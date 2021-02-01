@@ -18,6 +18,7 @@
     "next": "latest",
     "qs": "^6.9.6",
     "react": "latest",
+    "react-audio-player": "^0.14.0",
     "react-dom": "latest",
     "spotify-web-api-node": "^5.0.2",
     "xhr2": "^0.2.0"

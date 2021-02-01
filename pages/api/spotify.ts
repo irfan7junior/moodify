@@ -56,7 +56,7 @@ export default async (req: NowRequest, res: NowResponse) => {
   const spotifyApi = new spotifyWebApi({})
   spotifyApi.setAccessToken(response.data.access_token)
 
-  // console.log(spotifyApi.getAccessToken())
+  console.log(spotifyApi.getAccessToken())
 
   const results = await spotifyApi.getRecommendations({
     market,

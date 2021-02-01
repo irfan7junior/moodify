@@ -32,6 +32,7 @@ import { Track } from 'src/@types/common'
 import { PlayArrow } from '@material-ui/icons'
 
 import { MyTheme } from 'src/styles/material-ui'
+import AudioPlayer from 'src/components/AudioPlayer'
 
 interface valueType {
   value: number
@@ -92,7 +93,7 @@ const initialState = {
   surprised: 0,
 }
 
-const maxCount = 25
+const maxCount = 15
 
 export interface Iindex {}
 
@@ -221,7 +222,6 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
     if (expressionCount > maxCount) {
       stopVideo()
       setExpressionCount(0)
-      console.log(faceExpressions)
       setFinalExpression((prevState) => {
         const answers = {
           angry: Math.round(faceExpressions.angry * (100 / maxCount)),
@@ -409,13 +409,14 @@ const index: React.FC<Iindex & WithStyles<typeof styles>> = ({ classes }) => {
                         </Typography>
                       </CardContent>
                       <div className={css.controls}>
+                        <AudioPlayer previewURL={track.preview_url} />
                         <IconButton
                           style={{
-                            fontFamily: 'cursive',
-                            fontSize: 'small',
-                            backgroundColor: '#ede2e2',
-                            paddingRight: '5px',
+                            fontFamily: "'Langar'",
+                            fontSize: '0.8rem',
+                            backgroundColor: 'rgb(237, 226, 226)',
                             borderRadius: '25px',
+                            marginLeft: '5px',
                           }}
                           href={track.external_urls.spotify}
                           size="small"
