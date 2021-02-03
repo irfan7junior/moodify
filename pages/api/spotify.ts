@@ -4,6 +4,10 @@ import { FaceExpressions } from 'face-api.js'
 import qs from 'qs'
 import spotifyWebApi from 'spotify-web-api-node'
 
+const getRandomNumber = (array: any[]): number => {
+  return Math.floor(Math.random() * array.length)
+}
+
 const seed_artists = [
   '0E02VcvA5p1ndkLdqWD5JB',
   '4fEkbug6kZzzJ8eYX6Kbbp',
@@ -26,9 +30,55 @@ const seed_artists = [
   '0sSxphmGskGCKlwB9xa6WU',
   '0L5GV6LN8SWWUWIdBbTLTZ',
 ]
-const seed_genres = ['modern bollywood', 'hip hop', 'sufi', 'dance pop'].join(
-  ', '
-)
+
+const seed_genres = [
+  'acoustic',
+  'ambient',
+  'anime',
+  'black-metal',
+  'blues',
+  'bossanova',
+  'brazil',
+  'breakbeat',
+  'british',
+  'classical',
+  'comedy',
+  'country',
+  'dance',
+  'disney',
+  'edm',
+  'electro',
+  'folk',
+  'groove',
+  'guitar',
+  'happy',
+  'hard-rock',
+  'hardcore',
+  'heavy-metal',
+  'hip-hop',
+  'holidays',
+  'indian',
+  'jazz',
+  'k-pop',
+  'kids',
+  'metal',
+  'movies',
+  'new-age',
+  'new-release',
+  'rock',
+  'rock-n-roll',
+  'rockabilly',
+  'romance',
+  'sad',
+  'sleep',
+  'soul',
+  'soundtracks',
+  'study',
+  'summer',
+  'work-out',
+  'world-music',
+]
+
 const market = 'IN'
 
 export default async (req: NowRequest, res: NowResponse) => {
@@ -75,6 +125,11 @@ export default async (req: NowRequest, res: NowResponse) => {
 
   // console.log(spotifyApi.getAccessToken())
 
+  const genres: string[] = []
+  for (let i = 0; i < 4; i++) {
+    genres[i] = seed_genres[getRandomNumber(seed_genres)]
+  }
+
   let count = 0
   let results: any = { body: { tracks: [] } }
   while (true && count < 100) {
@@ -82,12 +137,13 @@ export default async (req: NowRequest, res: NowResponse) => {
       market,
       seed_artists:
         seed_artists[Math.floor(Math.random() * seed_artists.length)],
-      seed_genres,
+      seed_genres: ['indian'],
       limit: 10,
       target_danceability,
       target_energy,
       target_loudness,
     })
+    console.log(results.body.tracks)
     count++
     if (results.body.tracks.length > 0) break
   }
